@@ -1,0 +1,14 @@
+package ${package};
+
+import de.westemeyer.version.model.Artifact;
+import de.westemeyer.version.service.ArtifactVersionService;
+
+/**
+ * Generated version service implementation class for ${groupId}:${artifactId} artifact.
+ */
+public class ${serviceClass} implements ArtifactVersionService {
+    @Override
+    public Artifact getArtifact() {
+        return new Artifact("${groupId}", "${artifactId}", "${version}", ${timestamp}L, "${name}");
+    }
+}
