@@ -113,6 +113,7 @@ class GenerateServiceMojoTest {
     @Test
     void execute() {
         MockGenerateServiceMojo mojo = createMojo();
+        mojo.packageName = null;
         mojo.setInstreamBehaviour(INSTREAM_BEHAVIOUR.BYTE);
         mojo.setOutstreamBehaviour(OUTSTREAM_BEHAVIOUR.BYTE);
         Assertions.assertDoesNotThrow(mojo::execute);
