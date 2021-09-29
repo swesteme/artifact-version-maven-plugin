@@ -23,3 +23,7 @@ jobs:
           java-version: 1.8
       - name: Build with Maven
         run: mvn -B -Dgpg.skip verify
+      - name: Upload code coverage
+        if: ${{ success() }}
+        run: |
+            bash <(curl -s https://codecov.io/bash)
