@@ -6,7 +6,7 @@
 
     <groupId>de.westemeyer</groupId>
     <artifactId>artifact-version-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>Maven source code generator for artifact version services.</name>
     <description>The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.</description>
@@ -217,6 +217,7 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>3.6.3</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
@@ -228,11 +229,13 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
             <version>2.2.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.8.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
