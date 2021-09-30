@@ -1,6 +1,6 @@
 # Artifact version service maven generator plugin
 
-![Build Status Linux](https://github.com/swesteme/artifact-version-maven-plugin/workflows/Java%20CI%20with%20Maven/badge.svg?branch=main)
+![Build Status Linux](https://github.com/swesteme/artifact-version-maven-plugin/workflows/Java%20CI%20with%20Maven/badge.svg?branch=main) [![codecov](https://codecov.io/gh/swesteme/artifact-version-maven-plugin/branch/main/graph/badge.svg?token=O306I5GDXJ)](https://codecov.io/gh/swesteme/artifact-version-maven-plugin)
 
 The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.
 
@@ -22,7 +22,7 @@ artifact-version-maven-plugin is published under the
 ## Installation
 
 artifact-version-maven-plugin is available from
-[Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22de.westemeyer%22%20AND%20a%3A%22artifact-version-maven-plugin%22).
+[Maven Central](https://search.maven.org/artifact/de.westemeyer/artifact-version-maven-plugin).
 
 It is used in combination with the [artifact-version-service](https://github.com/swesteme/artifact-version-service) runtime dependency.
 ```xml
@@ -59,7 +59,7 @@ It is also possible to configure the generator to use target directories and a m
     <plugin>
       <groupId>de.westemeyer</groupId>
       <artifactId>artifact-version-maven-plugin</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <executions>
         <execution>
           <goals>
@@ -95,7 +95,7 @@ public class Main {
 }
 ```
 
-to your tests.
+Find more examples in `artifact-version-service`s description.
 
 ## Display generated Code in your IDE
 IntelliJ IDEA should show generated Java source files as soon as "Packages" perspective is selected in "Project" view. 
@@ -107,7 +107,7 @@ simply have a question about artifact-version-maven-plugin:
 
 * [Write an issue.](https://github.com/swesteme/artifact-version-maven-plugin/issues/new)
 * Create a pull request. (See [Understanding the GitHub Flow](https://guides.github.com/introduction/flow/index.html))
-* [Write a mail to sebastian@westemeyer.de](mailto:sebastian@westemeyer.de)
+* [Write an eMail to sebastian@westemeyer.de](mailto:sebastian@westemeyer.de)
 
 ## Development Guide
 
