@@ -6,7 +6,7 @@
 
     <groupId>de.westemeyer</groupId>
     <artifactId>artifact-version-maven-plugin</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <name>Maven source code generator for artifact version services.</name>
     <description>The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.</description>
