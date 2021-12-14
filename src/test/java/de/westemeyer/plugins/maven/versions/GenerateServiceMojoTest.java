@@ -1,6 +1,7 @@
 package de.westemeyer.plugins.maven.versions;
 
 import org.apache.maven.model.Build;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.junit.jupiter.api.Assertions;
@@ -99,7 +100,7 @@ class GenerateServiceMojoTest {
         mojo.setOutstreamBehaviour(OUTSTREAM_BEHAVIOUR.BYTE);
         mojo.setInstreamBehaviour(INSTREAM_BEHAVIOUR.BYTE);
         Assertions.assertDoesNotThrow(mojo::writeServiceClass);
-        Assertions.assertEquals("de.westemeyer:artifact-version-test:1.0.0-SNAPSHOT:My new maven project name:de.westemeyer.service.version:MyServiceClass", mojo.getOutputString().replace("\n", ""));
+        Assertions.assertEquals("\"de.westemeyer\":\"artifact-version-test\":\"1.0.0-SNAPSHOT\":\"My new maven project name\":\"de.westemeyer.service.version\":\"MyServiceClass\":\"https://www.myproject.com\":null", mojo.getOutputString().replace("\n", ""));
     }
 
     @Test
@@ -146,10 +147,13 @@ class GenerateServiceMojoTest {
         build.setOutputDirectory("target/testdir");
         project.setBuild(build);
         project.readModel(testPom);
-        project.setArtifactId(project.getModel().getArtifactId());
-        project.setGroupId(project.getModel().getGroupId());
-        project.setName(project.getModel().getName());
-        project.setVersion((project.getModel().getVersion()));
+        Model model = project.getModel();
+        project.setArtifactId(model.getArtifactId());
+        project.setGroupId(model.getGroupId());
+        project.setName(model.getName());
+        project.setVersion(model.getVersion());
+        project.setUrl(model.getUrl());
+        project.setDescription(model.getDescription());
         return project;
     }
 
@@ -164,7 +168,7 @@ class GenerateServiceMojoTest {
         private OUTSTREAM_BEHAVIOUR outstreamBehaviour = OUTSTREAM_BEHAVIOUR.SUPER;
         private INSTREAM_BEHAVIOUR instreamBehaviour = INSTREAM_BEHAVIOUR.SUPER;
         private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        private static final String TEMPLATE = "${groupId}:${artifactId}:${version}:${name}:${package}:${serviceClass}";
+        private static final String TEMPLATE = "\"${groupId}\":\"${artifactId}\":\"${version}\":\"${name}\":\"${package}\":\"${serviceClass}\":\"${url}\":\"${description}\"";
         private final ByteArrayInputStream inputStream = new ByteArrayInputStream(TEMPLATE.getBytes(StandardCharsets.UTF_8));
 
         @Override

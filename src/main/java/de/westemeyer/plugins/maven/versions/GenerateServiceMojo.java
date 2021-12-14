@@ -200,8 +200,13 @@ public class GenerateServiceMojo extends AbstractMojo {
 
                 // iterate map of template values for replacement
                 for (Map.Entry<String, String> entry : getTemplateValues().entrySet()) {
-                    // replace values in string
-                    out = out.replace("${" + entry.getKey() + "}", entry.getValue());
+                    String value = entry.getValue();
+                    if (value == null) {
+                        out = out.replace("\"${" + entry.getKey() + "}\"", "null");
+                    } else {
+                        // replace values in string
+                        out = out.replace("${" + entry.getKey() + "}", value);
+                    }
                 }
 
                 // write resulting java source code to output file
@@ -225,6 +230,8 @@ public class GenerateServiceMojo extends AbstractMojo {
         valueMap.put("artifactId", project.getArtifactId());
         valueMap.put("version", project.getVersion());
         valueMap.put("name", project.getName());
+        valueMap.put("url", project.getUrl());
+        valueMap.put("description", project.getDescription());
         valueMap.put("timestamp", "" + new Date().getTime());
         return valueMap;
     }
