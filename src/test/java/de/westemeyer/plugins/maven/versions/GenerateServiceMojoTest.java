@@ -51,7 +51,7 @@ class GenerateServiceMojoTest {
         Assertions.assertEquals("de.westemeyer.service.version", templateValues.get("package"));
         Assertions.assertEquals("MyServiceClass", templateValues.get("serviceClass"));
         Assertions.assertEquals("de.westemeyer", templateValues.get("groupId"));
-        Assertions.assertEquals("My new maven project name", templateValues.get("name"));
+        Assertions.assertEquals("My new maven\\nproject name", templateValues.get("name"));
         Assertions.assertEquals("artifact-version-test", templateValues.get("artifactId"));
         Assertions.assertEquals("1.0.0-SNAPSHOT", templateValues.get("version"));
         Assertions.assertDoesNotThrow(() -> Long.valueOf(templateValues.get("timestamp")));
@@ -100,7 +100,7 @@ class GenerateServiceMojoTest {
         mojo.setOutstreamBehaviour(OUTSTREAM_BEHAVIOUR.BYTE);
         mojo.setInstreamBehaviour(INSTREAM_BEHAVIOUR.BYTE);
         Assertions.assertDoesNotThrow(mojo::writeServiceClass);
-        Assertions.assertEquals("\"de.westemeyer\":\"artifact-version-test\":\"1.0.0-SNAPSHOT\":\"My new maven project name\":\"de.westemeyer.service.version\":\"MyServiceClass\":\"https://www.myproject.com\":null", mojo.getOutputString().replace("\n", ""));
+        Assertions.assertEquals("\"de.westemeyer\":\"artifact-version-test\":\"1.0.0-SNAPSHOT\":\"My new maven\\nproject name\":\"de.westemeyer.service.version\":\"MyServiceClass\":\"https://www.myproject.com\":null", mojo.getOutputString().replace("\n", ""));
     }
 
     @Test
@@ -119,6 +119,22 @@ class GenerateServiceMojoTest {
         mojo.setOutstreamBehaviour(OUTSTREAM_BEHAVIOUR.BYTE);
         Assertions.assertDoesNotThrow(mojo::execute);
         Assertions.assertTrue(mojo.project.getCompileSourceRoots().contains("target/testdir"));
+    }
+
+    @Test
+    void checkFileExistsCaseSensitive() {
+        File file = new File("target/testdir/de/westemeyer/service/version/MyServiceClass.java");
+        if (file.exists()) {
+            Assertions.assertTrue(file.delete());
+        }
+        MockGenerateServiceMojo mojo = createMojo();
+        Assertions.assertDoesNotThrow(mojo::writeServiceClass);
+        Assertions.assertTrue(mojo.checkFileExistsCaseSensitive(file, file.getName()));
+        Assertions.assertFalse(mojo.checkFileExistsCaseSensitive(file, "otherFileName.java"));
+        File file1 = new File(file.getParent(), "myServiceClass.java");
+        if (file1.exists()) {
+            Assertions.assertTrue(mojo.checkFileExistsCaseSensitive(file1, "MyServiceClass.java"));
+        }
     }
 
     private void assertServiceClassName(String artifactId, String expectedClassName) {

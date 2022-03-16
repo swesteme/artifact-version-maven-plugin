@@ -8,7 +8,8 @@
     <artifactId>artifact-version-test</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
-    <name>My new maven project name</name>
+    <name>My new maven
+project name</name>
     <url>https://www.myproject.com</url>
 
     <properties>

@@ -57,20 +57,24 @@ public class GenerateServiceMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoFailureException {
-        // optional package name parameter can be "guessed" from group ID
-        packageName = setUpParameterValue("Package name", packageName, () -> project.getGroupId() + ".versions");
+        String packaging = project.getPackaging();
+        // parent poms in multi-module projects do not need a service class
+        if (packaging == null || !packaging.equalsIgnoreCase("pom")) {
+            // optional package name parameter can be "guessed" from group ID
+            packageName = setUpParameterValue("Package name", packageName, () -> project.getGroupId() + ".versions");
 
-        // optional service class name parameter can be "guessed" from artifact ID
-        serviceClass = setUpParameterValue("Service class", serviceClass, this::determineServiceClassName);
+            // optional service class name parameter can be "guessed" from artifact ID
+            serviceClass = setUpParameterValue("Service class", serviceClass, this::determineServiceClassName);
 
-        // write the service class
-        writeServiceClass();
+            // write the service class
+            writeServiceClass();
 
-        // write the service manifest
-        writeServiceManifest();
+            // write the service manifest
+            writeServiceManifest();
 
-        // add source root for generated source file
-        project.addCompileSourceRoot(targetFolder.getPath());
+            // add source root for generated source file
+            project.addCompileSourceRoot(targetFolder.getPath());
+        }
     }
 
     /**
@@ -229,11 +233,21 @@ public class GenerateServiceMojo extends AbstractMojo {
         valueMap.put("groupId", project.getGroupId());
         valueMap.put("artifactId", project.getArtifactId());
         valueMap.put("version", project.getVersion());
-        valueMap.put("name", project.getName());
+        valueMap.put("name", replaceLineFeeds(project.getName()));
         valueMap.put("url", project.getUrl());
-        valueMap.put("description", project.getDescription());
+        valueMap.put("description", replaceLineFeeds(project.getDescription()));
         valueMap.put("timestamp", "" + new Date().getTime());
         return valueMap;
+    }
+
+    /**
+     * Strings in pom.xml files may contain line breaks. Replace these by backslash n to have valid String constants in
+     * generated service class files.
+     * @param input the input string from pom.xml
+     * @return correct string for service class
+     */
+    static String replaceLineFeeds(String input) {
+        return input == null ? null : input.replaceAll("(\\t|\\r?\\n)+", "\\\\n");
     }
 
     /**
@@ -294,7 +308,32 @@ public class GenerateServiceMojo extends AbstractMojo {
      * @throws FileNotFoundException in case the file can not be created
      */
     protected OutputStream createServiceClassOutputStream(File packageDir) throws FileNotFoundException {
-        return new FileOutputStream(new File(packageDir, serviceClass + ".java"));
+        // concatenate service class file name
+        String fileName = serviceClass + ".java";
+
+        // create file object
+        File file = new File(packageDir, fileName);
+
+        // check, whether file exists under a name that is similar, but not equal to file name (case-insensitive)
+        if (file.exists() && !checkFileExistsCaseSensitive(file, fileName) && !file.delete()) {
+            getLog().warn("Unable to remove file with different name before generating new artifact version service file. Try cleaning project first.");
+        }
+        return new FileOutputStream(file);
+    }
+
+    /**
+     * Check if a file exists with another combination of uppercase and lowercase characters. May be important when
+     * generating a new service class on a Windows or macOS system.
+     * @param file the file to check
+     * @param fileName the expected file name to compare to
+     * @return whether a file with different spelling exists
+     */
+    protected boolean checkFileExistsCaseSensitive(File file, String fileName) {
+        try {
+            return file.getCanonicalFile().getName().equals(fileName);
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
     /**
