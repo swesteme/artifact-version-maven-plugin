@@ -1,6 +1,8 @@
 # Artifact version service maven generator plugin
 
-![Build Status Linux](https://github.com/swesteme/artifact-version-maven-plugin/workflows/Java%20CI%20with%20Maven/badge.svg?branch=main) [![codecov](https://codecov.io/gh/swesteme/artifact-version-maven-plugin/branch/main/graph/badge.svg?token=O306I5GDXJ)](https://codecov.io/gh/swesteme/artifact-version-maven-plugin)
+![Build Status Linux](https://github.com/swesteme/artifact-version-maven-plugin/actions/workflows/ci.yml/badge.svg)
+[![GitHub release](https://img.shields.io/github/release/swesteme/artifact-version-maven-plugin.svg?label=changelog)](https://github.com/swesteme/artifact-version-maven-plugin/releases/latest)
+[![codecov](https://codecov.io/gh/swesteme/artifact-version-maven-plugin/branch/main/graph/badge.svg?token=O306I5GDXJ)](https://codecov.io/gh/swesteme/artifact-version-maven-plugin)
 
 The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.
 
@@ -67,7 +69,7 @@ It is used in combination with the [artifact-version-service](https://github.com
   <dependency>
     <groupId>de.westemeyer</groupId>
     <artifactId>artifact-version-service</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
   </dependency>
 </dependencies>
 ```
