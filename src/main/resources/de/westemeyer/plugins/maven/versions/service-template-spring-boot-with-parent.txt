@@ -2,13 +2,17 @@ package ${package};
 
 import de.westemeyer.version.core.api.ArtifactVersionService;
 import de.westemeyer.version.core.model.Artifact;
+import de.westemeyer.version.core.model.BasicArtifact;
+import org.springframework.stereotype.Service;
 
 /**
  * Generated version service implementation class for ${groupId}:${artifactId} artifact.
  */
+@Service
 public class ${serviceClass} implements ArtifactVersionService {
     @Override
     public Artifact getArtifact() {
-        return new Artifact("${groupId}", "${artifactId}", "${version}", ${timestamp}L, "${name}", "${description}", "${url}", null);
+${parentArtifactDefinition}
+        return new Artifact("${groupId}", "${artifactId}", "${version}", ${timestamp}L, "${name}", "${description}", "${url}", parentArtifact);
     }
 }

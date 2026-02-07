@@ -6,7 +6,7 @@
 
     <groupId>de.westemeyer</groupId>
     <artifactId>artifact-version-maven-plugin</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
 
     <name>Maven source code generator for artifact version services.</name>
     <description>The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.</description>
@@ -18,6 +18,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <version.maven-plugin-plugin>3.6.1</version.maven-plugin-plugin>
 
         <version.maven-resources-plugin>3.0.1</version.maven-resources-plugin>
@@ -138,7 +139,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.2.8</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -216,7 +217,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>3.6.3</version>
+            <version>3.9.12</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -241,14 +242,14 @@
         <dependency>
             <groupId>org.apache.maven.plugin-testing</groupId>
             <artifactId>maven-plugin-testing-harness</artifactId>
-            <version>3.3.0</version>
+            <version>3.5.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>3.6.0</version>
+            <version>3.9.12</version>
             <scope>provided</scope>
         </dependency>
 

@@ -4,15 +4,31 @@
 [![GitHub release](https://img.shields.io/github/release/swesteme/artifact-version-maven-plugin.svg?label=changelog)](https://github.com/swesteme/artifact-version-maven-plugin/releases/latest)
 [![codecov](https://codecov.io/gh/swesteme/artifact-version-maven-plugin/branch/main/graph/badge.svg?token=O306I5GDXJ)](https://codecov.io/gh/swesteme/artifact-version-maven-plugin)
 
-The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by ArtifactVersionCollector somewhere in the classpath.
+The artifact-version-maven-plugin is used to automatically generate artifact version information to be collected by an `ArtifactVersionCollector` somewhere in the classpath.
 
 A more elegant way to make your Java software project aware of its module (jar) dependencies and their versions. No more reading jar manifests, just a simple service loader enabled use of:
 
 ```java
-// iterate list of artifact dependencies
-for (Artifact artifact : ArtifactVersionCollector.collectArtifacts()) {
-    // print simple artifact string example
-    System.out.println("artifact = " + artifact);
+private void printArtifacts() {
+    // iterate list of artifact dependencies
+    for (Artifact artifact : ArtifactVersionCollector.collectArtifacts()) {
+        // print simple artifact string example
+        System.out.println("artifact = " + artifact);
+    }
+}
+```
+Or using Spring service injection:
+
+```java
+@Autowired
+private ArtifactVersionCollector artifactVersionCollector;
+
+private void printArtifacts() {
+    // iterate list of artifact dependencies
+    for (Artifact artifact : artifactVersionCollector.collectArtifacts()) {
+        // print simple artifact string example
+        System.out.println("artifact = " + artifact);
+    }
 }
 ```
 
@@ -26,14 +42,14 @@ artifact-version-maven-plugin is published under the
 artifact-version-maven-plugin is available from
 [Maven Central](https://search.maven.org/artifact/de.westemeyer/artifact-version-maven-plugin).
 
-It is used in combination with the [artifact-version-service](https://github.com/swesteme/artifact-version-service) runtime dependency.
+It is used in combination with the [artifact-version-service](https://github.com/swesteme/artifact-version-service) runtime dependency. See 
 ```xml
 <build>
   <plugins>
     <plugin>
       <groupId>de.westemeyer</groupId>
       <artifactId>artifact-version-maven-plugin</artifactId>
-      <version>1.1.1</version>
+      <version>2.0.0</version>
       <executions>
         <execution>
           <goals>
@@ -68,8 +84,9 @@ It is used in combination with the [artifact-version-service](https://github.com
 <dependencies>
   <dependency>
     <groupId>de.westemeyer</groupId>
-    <artifactId>artifact-version-service</artifactId>
-    <version>1.1.1</version>
+    <!-- or use artifact-version-service for plain Java services -->
+    <artifactId>artifact-version-service-spring-boot</artifactId>
+    <version>2.0.0</version>
   </dependency>
 </dependencies>
 ```
@@ -81,7 +98,7 @@ It is also possible to configure the generator to use target directories and a m
     <plugin>
       <groupId>de.westemeyer</groupId>
       <artifactId>artifact-version-maven-plugin</artifactId>
-      <version>1.1.1</version>
+      <version>2.0.0</version>
       <executions>
         <execution>
           <goals>
@@ -90,30 +107,13 @@ It is also possible to configure the generator to use target directories and a m
         </execution>
       </executions>
       <configuration>
+        <!-- for Spring services, if skipSpringBootAutoConfiguration is set make sure to generate into a base package or below -->
         <packageName>my.generated.service</packageName>
         <serviceClass>MyGeneratedServiceClass</serviceClass>
         <targetFolder>target/generated-sources</targetFolder>
+        <!-- or use NATIVE for plain Java services, SPRING_BOOT is the default value -->
+        <serviceType>SPRING_BOOT</serviceType>
       </configuration>
-    </plugin>
-    <plugin>
-      <!-- Add source folder to Eclipse configuration. IntelliJ will recognize extra source automatically. -->
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>build-helper-maven-plugin</artifactId>
-      <version>3.0.0</version>
-      <executions>
-          <execution>
-              <id>add-source</id>
-              <phase>generate-sources</phase>
-              <goals>
-                  <goal>add-source</goal>
-              </goals>
-              <configuration>
-                  <sources>
-                      <source>target/generated-sources</source>
-                  </sources>
-              </configuration>
-          </execution>
-      </executions>
     </plugin>
   </plugins>
 </build>
@@ -124,23 +124,33 @@ It is also possible to configure the generator to use target directories and a m
 Use `artifact-version-service`s functionality like in the following example:
 
 ```java
-import de.westemeyer.version.model.Artifact;
 import de.westemeyer.version.service.ArtifactVersionCollector;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 
-public class Main {
-  public static void main(String[] args) {
-    System.out.println("List of artifacts:");
-    for (Artifact artifact : ArtifactVersionCollector.collectArtifacts()) {
-      System.out.println("artifact = " + artifact);
+@org.springframework.context.annotation.ComponentScan
+@org.springframework.boot.autoconfigure.SpringBootApplication
+@org.springframework.boot.autoconfigure.EnableAutoConfiguration
+@lombok.RequiredArgsConstructor
+public class Main implements CommandLineRunner {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
     }
-  }
+
+    private final ArtifactVersionCollector collector;
+
+    @Override
+    public void run(String... args) {
+        collector.iterateArtifacts(artifact -> {
+            System.out.println("artifact = " + artifact);
+            return false;
+        });
+    }
 }
 ```
 
 Find more examples in `artifact-version-service`s description.
-
-## Display generated Code in your IDE
-IntelliJ IDEA should show generated Java source files as soon as "Packages" perspective is selected in "Project" view. 
 
 ## Contributing
 
