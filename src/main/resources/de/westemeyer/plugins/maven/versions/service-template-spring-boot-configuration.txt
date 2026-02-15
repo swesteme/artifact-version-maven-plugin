@@ -1,0 +1,13 @@
+package ${package};
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Configuration file used to automatically add the {@link de.westemeyer.version.service.ArtifactVersionCollector} bean.
+ */
+@Configuration
+@ComponentScan
+public class ${configClass} {
+
+}
