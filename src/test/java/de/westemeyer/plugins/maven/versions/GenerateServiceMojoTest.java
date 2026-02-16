@@ -312,16 +312,11 @@ class GenerateServiceMojoTest {
         GenerateServiceMojo mock = getServiceMojoMock();
         when(mock.getParentArtifactDefinition()).thenCallRealMethod();
         MavenProject project = mock.project;
-        MavenProject grandParentProject = mock(MavenProject.class);
-        MavenProject parentProject = mock(MavenProject.class);
+        MavenProject grandParentProject = getMavenProject("grandParentGroupId", "grandParentArtifactId",
+                "grandParentVersion");
+        MavenProject parentProject = getMavenProject("parentGroupId", "parentArtifactId", "parentVersion");
         when(project.getParent()).thenReturn(parentProject);
         when(parentProject.getParent()).thenReturn(grandParentProject);
-        when(parentProject.getArtifactId()).thenReturn("parentArtifactId");
-        when(parentProject.getGroupId()).thenReturn("parentGroupId");
-        when(parentProject.getVersion()).thenReturn("parentVersion");
-        when(grandParentProject.getArtifactId()).thenReturn("grandParentArtifactId");
-        when(grandParentProject.getGroupId()).thenReturn("grandParentGroupId");
-        when(grandParentProject.getVersion()).thenReturn("grandParentVersion");
         // when
         String parentArtifactDefinition = mock.getParentArtifactDefinition();
         // then
@@ -406,9 +401,7 @@ class GenerateServiceMojoTest {
                        String fileContent, boolean skipAutoConfiguration) throws MojoFailureException {
         // given
         GenerateServiceMojo mojo = getServiceMojoMock();
-        MavenProject project = mojo.project;
-        when(project.getGroupId()).thenReturn("de.westemeyer");
-        when(project.getArtifactId()).thenReturn("artifact-versions");
+        mojo.project = getMavenProject("de.westemeyer", "artifact-versions", "parentVersion");
         when(mojo.getLog()).thenReturn(mock(Log.class));
         when(mojo.getTemplateResourceFileName()).thenReturn("template");
         Map<String, String> mockTemplateValues = new HashMap<>();
@@ -418,18 +411,55 @@ class GenerateServiceMojoTest {
         mojo.skipSpringBootAutoConfiguration = skipAutoConfiguration;
         when(mojo.setUpParameterValue(anyString(), any(), any())).thenCallRealMethod();
         when(mojo.determineServiceClassName()).thenCallRealMethod();
+        when(mojo.determineAutoConfigClassName()).thenCallRealMethod();
         doCallRealMethod().when(mojo).generateFiles();
         // when
         mojo.generateFiles();
         // then
         verify(mojo).writeClassFile("template", mockTemplateValues, "ArtifactVersionsVersionService");
-        verify(project).addCompileSourceRoot("folder");
+        verify(mojo.project).addCompileSourceRoot("folder");
         verify(mojo, times(type == ServiceType.NATIVE || !skipAutoConfiguration ? 1 : 0)).writeServiceManifest(
                 subDirectory, fileName, fileContent);
         if (type.equals(ServiceType.SPRING_BOOT) && !skipAutoConfiguration) {
             verify(mojo).writeClassFile("service-template-spring-boot-configuration.txt", mockTemplateValues,
                     "ArtifactVersionsAutoConfiguration");
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"abc,def,SPRING_BOOT,abc,def",
+            "abc,abc,SPRING_BOOT,abc,abcAutoConfiguration",
+            "abc,abc,NATIVE,abc,abc",
+            "abcVersionService,autoConfig,SPRING_BOOT,abcVersionService,autoConfig",
+            "AbcVersionService,,SPRING_BOOT,AbcVersionService,AbcAutoConfiguration",
+            "abc,,SPRING_BOOT,abc,abcAutoConfiguration",
+            ",abc,SPRING_BOOT,ArtifactVersionsVersionService,abc",
+            ",,SPRING_BOOT,ArtifactVersionsVersionService,ArtifactVersionsAutoConfiguration"})
+    void generateFilesCheckClassNames(String serviceClass, String autoConfigClass,
+                                      ServiceType serviceType, String expectedServiceClass,
+                                      String expectedAutoConfigClass) throws MojoFailureException {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        mojo.project = getMavenProject("de.westemeyer", "artifact-versions", "parentVersion");
+        mojo.serviceClass = serviceClass;
+        mojo.autoConfigurationClass = autoConfigClass;
+        when(mojo.getLog()).thenReturn(mock(Log.class));
+        when(mojo.getTemplateResourceFileName()).thenReturn("template");
+        Map<String, String> mockTemplateValues = new HashMap<>();
+        when(mojo.getTemplateValues(autoConfigClass)).thenReturn(mockTemplateValues);
+        mojo.serviceType = serviceType;
+        mojo.targetFolder = new File("folder");
+        when(mojo.setUpParameterValue(anyString(), any(), any())).thenCallRealMethod();
+        when(mojo.determineServiceClassName()).thenCallRealMethod();
+        when(mojo.determineAutoConfigClassName()).thenCallRealMethod();
+        doCallRealMethod().when(mojo).generateFiles();
+
+        // when
+        mojo.generateFiles();
+
+        // then
+        assertEquals(expectedServiceClass, mojo.serviceClass);
+        assertEquals(expectedAutoConfigClass, mojo.autoConfigurationClass);
     }
 
     @Test

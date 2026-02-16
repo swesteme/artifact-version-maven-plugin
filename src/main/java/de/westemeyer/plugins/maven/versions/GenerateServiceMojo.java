@@ -42,6 +42,16 @@ public class GenerateServiceMojo extends AbstractMojo {
     private static final String NULL_STRING = "null";
 
     /**
+     * Constant string for service class postfix.
+     */
+    private static final String VERSION_SERVICE_STRING = "VersionService";
+
+    /**
+     * Constant string for autoconfiguration class postfix.
+     */
+    private static final String AUTO_CONFIGURATION_STRING = "AutoConfiguration";
+
+    /**
      * The project object is injected with information from a project's pom.xml.
      */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -102,8 +112,14 @@ public class GenerateServiceMojo extends AbstractMojo {
         serviceClass = setUpParameterValue("Service class", serviceClass, this::determineServiceClassName);
 
         // create autoconfig class name
-        autoConfigurationClass = setUpParameterValue("Autoconfiguration class",
-                autoConfigurationClass, () -> serviceClass.replaceAll("(VersionService)$", "AutoConfiguration"));
+        autoConfigurationClass = setUpParameterValue("Autoconfiguration class", autoConfigurationClass,
+                this::determineAutoConfigClassName);
+
+        // in case both classes end up with the same name, append AutoConfiguration again
+        if (serviceType.equals(ServiceType.SPRING_BOOT) && serviceClass.equals(autoConfigurationClass)) {
+            autoConfigurationClass = determineAutoConfigClassName();
+            getLog().info("Service class name and auto configuration class name can not be the same.");
+        }
 
         // template values to be replaced in template resource files to create meaningful classes
         Map<String, String> templateValues = getTemplateValues(autoConfigurationClass);
@@ -227,7 +243,19 @@ public class GenerateServiceMojo extends AbstractMojo {
         }
 
         // postfix and return result
-        return output + "VersionService";
+        return output + VERSION_SERVICE_STRING;
+    }
+
+    /**
+     * Determine the autoconfiguration class name from the (provided or generated) service class name.
+     *
+     * @return the autoconfiguration class name
+     */
+    String determineAutoConfigClassName() {
+        if (serviceClass.endsWith(VERSION_SERVICE_STRING)) {
+            return serviceClass.replaceAll("VersionService$", AUTO_CONFIGURATION_STRING);
+        }
+        return serviceClass + AUTO_CONFIGURATION_STRING;
     }
 
     /**
