@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * the ArtifactVersionService interface to provide artifact coordinates and version for ArtifactVersionCollector.
  * Second: generate a new service loader definition file so the service loader can pick up the information.
  */
-@Mojo(name = "generate-service", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate-service", defaultPhase = LifecyclePhase.GENERATE_SOURCES, threadSafe = true)
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class GenerateServiceMojo extends AbstractMojo {
     /**
