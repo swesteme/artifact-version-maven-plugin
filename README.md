@@ -113,6 +113,8 @@ It is also possible to configure the generator to use target directories and a m
         <targetFolder>target/generated-sources</targetFolder>
         <!-- or use NATIVE for plain Java services, SPRING_BOOT is the default value -->
         <serviceType>SPRING_BOOT</serviceType>
+        <!-- optionally control @NullMarked generation (auto-detected if org.jspecify:jspecify dependency is present) -->
+        <addNullMarked>true</addNullMarked>
       </configuration>
     </plugin>
   </plugins>

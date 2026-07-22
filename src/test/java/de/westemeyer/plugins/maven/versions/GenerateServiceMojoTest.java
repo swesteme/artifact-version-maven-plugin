@@ -1,6 +1,8 @@
 package de.westemeyer.plugins.maven.versions;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -22,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -115,7 +118,82 @@ class GenerateServiceMojoTest {
         assertEquals(
                 "        BasicArtifact parentArtifact = new BasicArtifact(\"de.westemeyer.parent\", \"artifact-version-test-parent\", \"1.0.0\", null);\n",
                 templateValues.get("parentArtifactDefinition"));
+        assertEquals("", templateValues.get("nullMarkedImport"));
+        assertEquals("", templateValues.get("nullMarkedAnnotation"));
         assertDoesNotThrow(() -> Long.valueOf(templateValues.get("timestamp")));
+    }
+
+    @Test
+    void getTemplateValuesWithNullMarked() {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        mojo.serviceClass = "MyServiceClass";
+        mojo.packageName = "de.westemeyer.service.version";
+        mojo.addNullMarked = true;
+        mojo.project = getMavenProject("de.westemeyer", "artifact-version-test", "1.0.0-SNAPSHOT");
+        when(mojo.getTemplateValues(anyString())).thenCallRealMethod();
+        when(mojo.getParentArtifactDefinition()).thenCallRealMethod();
+        when(mojo.isNullMarked()).thenCallRealMethod();
+
+        // when
+        Map<String, String> templateValues = mojo.getTemplateValues("ConfigClass");
+
+        // then
+        assertEquals("import org.jspecify.annotations.NullMarked;\n", templateValues.get("nullMarkedImport"));
+        assertEquals("@NullMarked\n", templateValues.get("nullMarkedAnnotation"));
+    }
+
+    @Test
+    void isNullMarkedExplicit() {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        when(mojo.isNullMarked()).thenCallRealMethod();
+
+        // explicit true
+        mojo.addNullMarked = true;
+        assertTrue(mojo.isNullMarked());
+
+        // explicit false
+        mojo.addNullMarked = false;
+        assertFalse(mojo.isNullMarked());
+    }
+
+    @Test
+    void isJSpecifyPresentDirectDependency() {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        when(mojo.isJSpecifyPresent()).thenCallRealMethod();
+        Dependency dependency = new Dependency();
+        dependency.setGroupId("org.jspecify");
+        dependency.setArtifactId("jspecify");
+        when(mojo.project.getDependencies()).thenReturn(Collections.singletonList(dependency));
+
+        // when/then
+        assertTrue(mojo.isJSpecifyPresent());
+    }
+
+    @Test
+    void isJSpecifyPresentArtifact() {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        when(mojo.isJSpecifyPresent()).thenCallRealMethod();
+        Artifact artifact = mock(Artifact.class);
+        when(artifact.getGroupId()).thenReturn("org.jspecify");
+        when(artifact.getArtifactId()).thenReturn("jspecify");
+        when(mojo.project.getArtifacts()).thenReturn(Collections.singleton(artifact));
+
+        // when/then
+        assertTrue(mojo.isJSpecifyPresent());
+    }
+
+    @Test
+    void isJSpecifyPresentNotFound() {
+        // given
+        GenerateServiceMojo mojo = getServiceMojoMock();
+        when(mojo.isJSpecifyPresent()).thenCallRealMethod();
+
+        // when/then
+        assertFalse(mojo.isJSpecifyPresent());
     }
 
     private static MavenProject getMavenProject(String groupId, String artifactId, String version) {
