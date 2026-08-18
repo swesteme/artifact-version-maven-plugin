@@ -24,9 +24,11 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -144,10 +146,14 @@ class GenerateServiceMojoTest {
     }
 
     @Test
-    void isNullMarkedExplicit() {
+    void isNullMarked() {
         // given
         GenerateServiceMojo mojo = getServiceMojoMock();
         when(mojo.isNullMarked()).thenCallRealMethod();
+        when(mojo.isJSpecifyPresent()).thenReturn(true);
+
+        // addNullMarked is null
+        assertTrue(mojo.isNullMarked());
 
         // explicit true
         mojo.addNullMarked = true;
@@ -158,32 +164,40 @@ class GenerateServiceMojoTest {
         assertFalse(mojo.isNullMarked());
     }
 
-    @Test
-    void isJSpecifyPresentDirectDependency() {
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({"Dependency found,org.jspecify,jspecify,true", "Other group ID,org.junspecify,jspecify,false", "Other group ID,org.jspecify,junspecify,false"})
+    void isJSpecifyPresentDirectDependency(String name, String groupId, String artifactId, boolean expected) {
         // given
         GenerateServiceMojo mojo = getServiceMojoMock();
         when(mojo.isJSpecifyPresent()).thenCallRealMethod();
         Dependency dependency = new Dependency();
-        dependency.setGroupId("org.jspecify");
-        dependency.setArtifactId("jspecify");
-        when(mojo.project.getDependencies()).thenReturn(Collections.singletonList(dependency));
+        dependency.setGroupId(groupId);
+        dependency.setArtifactId(artifactId);
+        List<Object> dependencies = new ArrayList<>();
+        dependencies.add(new Object());
+        dependencies.add(dependency);
+        when(mojo.project.getDependencies()).thenReturn(dependencies);
 
         // when/then
-        assertTrue(mojo.isJSpecifyPresent());
+        assertEquals(expected, mojo.isJSpecifyPresent());
     }
 
-    @Test
-    void isJSpecifyPresentArtifact() {
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({"Dependency found,org.jspecify,jspecify,true", "Other group ID,org.junspecify,jspecify,false", "Other group ID,org.jspecify,junspecify,false"})
+    void isJSpecifyPresentArtifact(String name, String groupId, String artifactId, boolean expected) {
         // given
         GenerateServiceMojo mojo = getServiceMojoMock();
         when(mojo.isJSpecifyPresent()).thenCallRealMethod();
         Artifact artifact = mock(Artifact.class);
-        when(artifact.getGroupId()).thenReturn("org.jspecify");
-        when(artifact.getArtifactId()).thenReturn("jspecify");
-        when(mojo.project.getArtifacts()).thenReturn(Collections.singleton(artifact));
+        when(artifact.getGroupId()).thenReturn(groupId);
+        when(artifact.getArtifactId()).thenReturn(artifactId);
+        List<Object> artifacts = new ArrayList<>();
+        artifacts.add(new Object());
+        artifacts.add(artifact);
+        when(mojo.project.getArtifacts()).thenReturn(new CopyOnWriteArraySet<>(artifacts));
 
         // when/then
-        assertTrue(mojo.isJSpecifyPresent());
+        assertEquals(expected, mojo.isJSpecifyPresent());
     }
 
     @Test

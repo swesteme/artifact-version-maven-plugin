@@ -381,31 +381,35 @@ public class GenerateServiceMojo extends AbstractMojo {
      * @return true if org.jspecify:jspecify is found
      */
     boolean isJSpecifyPresent() {
-        if (project != null) {
-            if (project.getDependencies() != null) {
-                for (Object depObj : project.getDependencies()) {
-                    if (depObj instanceof Dependency) {
-                        Dependency dependency = (Dependency) depObj;
-                        if (JSPECIFY_GROUP_ID.equals(dependency.getGroupId())
-                                && JSPECIFY_ARTIFACT_ID.equals(dependency.getArtifactId())) {
-                            return true;
-                        }
-                    }
+        for (Object depObj : project.getDependencies()) {
+            if (depObj instanceof Dependency) {
+                Dependency dependency = (Dependency) depObj;
+                if (isJspecify(dependency.getGroupId(), dependency.getArtifactId())) {
+                    return true;
                 }
             }
-            if (project.getArtifacts() != null) {
-                for (Object artObj : project.getArtifacts()) {
-                    if (artObj instanceof Artifact) {
-                        Artifact artifact = (Artifact) artObj;
-                        if (JSPECIFY_GROUP_ID.equals(artifact.getGroupId())
-                                && JSPECIFY_ARTIFACT_ID.equals(artifact.getArtifactId())) {
-                            return true;
-                        }
-                    }
+        }
+        for (Object artObj : project.getArtifacts()) {
+            if (artObj instanceof Artifact) {
+                Artifact artifact = (Artifact) artObj;
+                if (isJspecify(artifact.getGroupId(), artifact.getArtifactId())) {
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Determine, whether given coordinates are specify.
+     *
+     * @param groupId    the object's group ID
+     * @param artifactId the object's artifact ID
+     * @return whether the given group ID and artifact ID match jspecify
+     */
+    private static boolean isJspecify(String groupId, String artifactId) {
+        return JSPECIFY_GROUP_ID.equals(groupId)
+                && JSPECIFY_ARTIFACT_ID.equals(artifactId);
     }
 
     /**
