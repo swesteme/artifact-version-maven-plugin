@@ -1,5 +1,7 @@
 package de.westemeyer.plugins.maven.versions;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -52,6 +54,16 @@ public class GenerateServiceMojo extends AbstractMojo {
     private static final String AUTO_CONFIGURATION_STRING = "AutoConfiguration";
 
     /**
+     * Group ID for JSpecify.
+     */
+    private static final String JSPECIFY_GROUP_ID = "org.jspecify";
+
+    /**
+     * Artifact ID for JSpecify.
+     */
+    private static final String JSPECIFY_ARTIFACT_ID = "jspecify";
+
+    /**
      * The project object is injected with information from a project's pom.xml.
      */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -94,6 +106,13 @@ public class GenerateServiceMojo extends AbstractMojo {
      */
     @Parameter
     boolean skipSpringBootAutoConfiguration = false;
+
+    /**
+     * Whether to annotate generated classes with org.jspecify.annotations.NullMarked.
+     * Defaults to true if org.jspecify:jspecify is present in project dependencies.
+     */
+    @Parameter
+    Boolean addNullMarked;
 
     @Override
     public void execute() throws MojoFailureException {
@@ -338,7 +357,59 @@ public class GenerateServiceMojo extends AbstractMojo {
         valueMap.put("description", replaceLineFeeds(project.getDescription()));
         valueMap.put("timestamp", "" + new Date().getTime());
         valueMap.put("parentArtifactDefinition", getParentArtifactDefinition());
+        boolean useNullMarked = isNullMarked();
+        valueMap.put("nullMarkedImport", useNullMarked ? "import org.jspecify.annotations.NullMarked;\n" : "");
+        valueMap.put("nullMarkedAnnotation", useNullMarked ? "@NullMarked\n" : "");
         return valueMap;
+    }
+
+    /**
+     * Determine whether generated classes should be annotated with @NullMarked.
+     *
+     * @return true if addNullMarked is explicitly true, or if addNullMarked is not set and jspecify is present
+     */
+    boolean isNullMarked() {
+        if (addNullMarked != null) {
+            return addNullMarked;
+        }
+        return isJSpecifyPresent();
+    }
+
+    /**
+     * Check whether org.jspecify:jspecify dependency is present in the project dependencies or artifacts.
+     *
+     * @return true if org.jspecify:jspecify is found
+     */
+    boolean isJSpecifyPresent() {
+        for (Object depObj : project.getDependencies()) {
+            if (depObj instanceof Dependency) {
+                Dependency dependency = (Dependency) depObj;
+                if (isJspecify(dependency.getGroupId(), dependency.getArtifactId())) {
+                    return true;
+                }
+            }
+        }
+        for (Object artObj : project.getArtifacts()) {
+            if (artObj instanceof Artifact) {
+                Artifact artifact = (Artifact) artObj;
+                if (isJspecify(artifact.getGroupId(), artifact.getArtifactId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine, whether given coordinates are specify.
+     *
+     * @param groupId    the object's group ID
+     * @param artifactId the object's artifact ID
+     * @return whether the given group ID and artifact ID match jspecify
+     */
+    private static boolean isJspecify(String groupId, String artifactId) {
+        return JSPECIFY_GROUP_ID.equals(groupId)
+                && JSPECIFY_ARTIFACT_ID.equals(artifactId);
     }
 
     /**

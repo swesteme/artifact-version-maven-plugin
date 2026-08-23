@@ -49,7 +49,7 @@ It is used in combination with the [artifact-version-service](https://github.com
     <plugin>
       <groupId>de.westemeyer</groupId>
       <artifactId>artifact-version-maven-plugin</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
       <executions>
         <execution>
           <goals>
@@ -98,7 +98,7 @@ It is also possible to configure the generator to use target directories and a m
     <plugin>
       <groupId>de.westemeyer</groupId>
       <artifactId>artifact-version-maven-plugin</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
       <executions>
         <execution>
           <goals>
@@ -113,6 +113,8 @@ It is also possible to configure the generator to use target directories and a m
         <targetFolder>target/generated-sources</targetFolder>
         <!-- or use NATIVE for plain Java services, SPRING_BOOT is the default value -->
         <serviceType>SPRING_BOOT</serviceType>
+        <!-- optionally control @NullMarked generation (auto-detected if org.jspecify:jspecify dependency is present) -->
+        <addNullMarked>true</addNullMarked>
       </configuration>
     </plugin>
   </plugins>
